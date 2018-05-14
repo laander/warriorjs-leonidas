@@ -8,7 +8,7 @@ class Player {
   playTurn(warrior) {
     this.warrior = warrior
 
-    // Turn around in the very first round
+    // Turn around in the very first round (with some hacky conditionals)
     if (this.firstRound) {
       this.firstRound = false
       if (this.isCaptiveInSight(this.getOppositeDirection()) && !this.isEndOfLine(this.getOppositeDirection())) {
@@ -17,7 +17,7 @@ class Player {
       }
     }
 
-    // Go up the stairs
+    // Go up the stairs if they are right next to us
     if (this.isStairsNext()) {
       warrior.walk(this.direction)
       return this.terminate()
@@ -29,37 +29,37 @@ class Player {
       return this.terminate()
     }
     
-    // Rescue captive
+    // Rescue captive if next to us
     if (warrior.feel(this.direction).isCaptive()) {
       warrior.rescue(this.direction)
       return this.terminate()
     }
 
-    // Attack enemy
+    // Attack enemy if next to us
     if (warrior.feel(this.direction).isEnemy()) {
       warrior.attack(this.direction)
       return this.terminate()
     }
 
-    // Shoot at enemy
+    // Shoot at enemy if in sight
     if (this.isEnemyInSight() && !this.isUnderAttack() && this.isUnitInSight(['Wizard', 'Archer', 'Thick Sludge'])) {
       warrior.shoot()
       return this.terminate()
     }
     
-    // Step back when under attack
+    // Step back when wounded and under attack
     if (this.isWounded() && this.isUnderAttack()) {
       warrior.walk(this.getOppositeDirection())
       return this.terminate()
     }
 
-    // Rest if damaged and not under attack
+    // Rest if damaged and not under attack and not about to reach stairs
     if (this.isWounded() && !this.isUnderAttack() && !this.isCaptiveInSight() && !this.isStairsEndOfLine()) {
       warrior.rest()
       return this.terminate()
     }
 
-    // Continue resting if already began
+    // Continue resting if already began (and dont over-rest unnecessarily)
     if (this.isResting() && warrior.health() < (this.getFirstUnitHealthInSight() || 12)) {
       warrior.rest()
       return this.terminate()
@@ -70,6 +70,7 @@ class Player {
     return this.terminate()
   }
 
+  // Cache the current health until next round before ending
   terminate () {
     this.health = this.warrior.health()
   }
