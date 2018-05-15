@@ -3,6 +3,8 @@ class Player {
   constructor () {
     this.direction = 'forward'
     this.firstRound = true
+    this.healthWounded = 6
+    this.healthRecovered = 12
   }
 
   playTurn(warrior) {
@@ -42,7 +44,7 @@ class Player {
     }
 
     // Shoot at enemy if in sight
-    if (this.isEnemyInSight() && !this.isUnderAttack() && this.isUnitInSight(['Wizard', 'Archer', 'Thick Sludge'])) {
+    if (this.isEnemyInSight() && !this.isUnderAttack() && !this.isUnitInSight(['Sludge'])) {
       warrior.shoot()
       return this.terminate()
     }
@@ -60,7 +62,7 @@ class Player {
     }
 
     // Continue resting if already began (and dont over-rest unnecessarily)
-    if (this.isResting() && warrior.health() < (this.getFirstUnitHealthInSight() || 12)) {
+    if (this.isResting() && warrior.health() < (this.getFirstUnitHealthInSight() || this.healthRecovered)) {
       warrior.rest()
       return this.terminate()
     }
@@ -76,7 +78,7 @@ class Player {
   }
 
   isWounded() {
-    return this.warrior.health() < 6
+    return this.warrior.health() < this.healthWounded
   }
 
   isEnemyInSight(direction = this.direction) {
